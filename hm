@@ -1,0 +1,70 @@
+1 | <script>
+2 |   import { supaClient } from '$lib/supabase';
+3 | 
+4 |   let signupEmail = '';
+5 |   let signupPassword = '';
+6 |   let loginEmail = '';
+7 |   let loginPassword = '';
+8 |   let loggedIn = false;
+9 |   let userId = null;
+10| 
+11|   async function signUp() {
+12|     const { data: existing, error: checkError } = await supaClient
+13|       .from('users')
+14|       .select('*')
+15|       .eq('email', signupEmail);
+16| 
+17|     if (checkError) return alert(`Error: ${checkEr-ror.message}`);
+18|     if (existing.length > 0) return alert('Email already reg-istered.');
+19| 
+20|     const { data, error } = await supaClient
+21|       .from('users')
+22|       .insert([{ email: signupEmail, password: signupPassword }])
+23|       .select()
+24|       .single();
+25| 
+26|     if (error) return alert(`Signup failed: ${er-ror.message}`);
+27| 
+28|     userId = data.id;
+29|     loggedIn = true;
+30|   }
+31| 
+32|   async function login() {
+33|     const { data, error } = await supaClient
+34|       .from('users')
+35|       .select('*')
+36|       .eq('email', loginEmail)
+37|       .eq('password', loginPassword)
+38|       .single();
+39| 
+40|     if (error) return alert(`Error: ${error.message}`);
+41|     if (!data) return alert('Invalid email or password.');
+42| 
+43|     userId = data.id;
+44|     loggedIn = true;
+45|   }
+46| 
+47|   function signOut() {
+48|     loggedIn = false;
+49|     userId = null;
+50|     apiKeys = [];
+51|     signupEmail = signupPassword = loginEmail = loginPassword = '';
+52|   }
+53| </script>
+54| 
+55| <main>
+56|   {#if !loggedIn}
+57|     <h2>Sign Up</h2>
+58|     <input type="email" bind:value={signupEmail} placehold-er="Email" />
+59|     <input type="password" bind:value={signupPassword} place-holder="Password" />
+60|     <button on:click={signUp}>Sign Up</button>
+61| 
+62|     <h2>Login</h2>
+63|     <input type="email" bind:value={loginEmail} placehold-er="Email" />
+64|     <input type="password" bind:value={loginPassword} place-holder="Password" />
+65|     <button on:click={login}>Login</button>
+66|   {:else}
+67|     <h2>You are logged in with {userId} id</h2>
+68|     <button on:click={signOut}>Sign Out</button>
+69|   {/if}
+70| </main>
